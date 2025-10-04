@@ -4,13 +4,6 @@ A comprehensive, enterprise-grade banking automation system built with Flask, SQ
 
 ## 🚀 Key Features
 
-### 🔐 User Authentication & Security
-- ✅ **Role-based login system** (Customer, Bank Staff, Admin)
-- ✅ **Secure password hashing** with bcrypt
-- ✅ **2FA/OTP simulation** for enhanced security
-- ✅ **Session management** with secure cookies
-- ✅ **Multi-factor authentication** workflow
-
 ### 👥 Customer Services (Customer Dashboard)
 - ✅ **Account creation & KYC verification**
 - ✅ **Real-time balance inquiry**
