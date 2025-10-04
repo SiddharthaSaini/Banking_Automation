@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - NovaFin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            min-height: 100vh;
+            color: white;
+            position: fixed;
+            width: 250px;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            transition: all 0.3s ease;
+        }
+
+        .main-content.expanded {
+            margin-left: 70px;
+        }
+
+        .navbar-custom {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: none;
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .transaction-card {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .loan-card {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .deposit-card {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+
+        .quick-action {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .quick-action:hover {
+            transform: translateY(-5px);
+            border-color: #3b82f6;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin: 0.25rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        .transaction-item {
+            border-left: 4px solid #10b981;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: white;
+            border-radius: 0 10px 10px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .transaction-item.withdrawal {
+            border-left-color: #ef4444;
+        }
+
+        .transaction-item.transfer {
+            border-left-color: #3b82f6;
+        }
+
+        .kyc-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .kyc-verified {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .kyc-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .kyc-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="p-3">
+            <div class="d-flex align-items-center mb-4">
+                <i class="fas fa-university fa-2x me-3"></i>
+                <span class="sidebar-text">NovaFin</span>
+            </div>
+            
+            <div class="nav flex-column">
+                <a class="nav-link" href="/" onclick="window.location.href='/'">
+                    <i class="fas fa-home"></i>
+                    <span class="sidebar-text">Home</span>
+                </a>
+                <a class="nav-link active" href="#dashboard" onclick="showSection('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="sidebar-text">Dashboard</span>
+                </a>
+                <!--Account detail implement later-->
+                <!--<a class="nav-link" href="#accounts" onclick="showSection('accounts')">
+                    <i class="fas fa-wallet"></i>
+                    <span class="sidebar-text">My Accounts</span>
+                </a>-->
+                <a class="nav-link" href="#transactions" onclick="showSection('transactions')">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span class="sidebar-text">Transactions</span>
+                </a>
+                <!---Later loan detail update
+                <a class="nav-link" href="#loans" onclick="showSection('loans')">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <span class="sidebar-text">Loans</span>
+                </a>-->
+                <a class="nav-link" href="#deposits" onclick="showSection('deposits')">
+                    <i class="fas fa-piggy-bank"></i>
+                    <span class="sidebar-text">Deposits</span>
+                </a>
+                <a class="nav-link" href="#profile" onclick="showSection('profile')">
+                    <i class="fas fa-user"></i>
+                    <span class="sidebar-text">Profile</span>
+                </a>
+                <a class="nav-link" href="#" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="sidebar-text">Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid">
+                <button class="btn btn-outline-secondary d-md-none" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <div class="navbar-nav ms-auto">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-2"></i>
+                            <span id="userName">Loading...</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#profile" onclick="showSection('profile')">
+                                <i class="fas fa-user me-2"></i>Profile
+                            </a></li>
+                            <li><a class="dropdown-item" href="#" onclick="showNotifications()">
+                                <i class="fas fa-bell me-2"></i>Notifications
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="section">
+            <div class="container-fluid p-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="fw-bold">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </h2>
+                        <p class="text-muted">Welcome back! Here's an overview of your accounts.</p>
+                    </div>
+                </div>
+
+                <!-- Account Overview Cards -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card dashboard-card balance-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">Total Balance</h6>
+                                        <h3 class="mb-0" id="totalBalance">₹0</h3>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-rupee-sign fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card dashboard-card transaction-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">This Month</h6>
+                                        <h3 class="mb-0" id="monthlyTransactions">0</h3>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-exchange-alt fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card dashboard-card loan-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">Active Loans</h6>
+                                        <h3 class="mb-0" id="activeLoans">0</h3>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-hand-holding-usd fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card dashboard-card deposit-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title">Fixed Deposits</h6>
+                                        <h3 class="mb-0" id="fixedDeposits">0</h3>
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-piggy-bank fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="fw-bold mb-3">Quick Actions</h5>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <div class="quick-action" onclick="showSection('transactions')">
+                            <i class="fas fa-plus-circle fa-2x text-success mb-2"></i>
+                            <h6>Deposit</h6>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <div class="quick-action" onclick="showSection('transactions')">
+                            <i class="fas fa-minus-circle fa-2x text-danger mb-2"></i>
+                            <h6>Withdraw</h6>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <div class="quick-action" onclick="showSection('transactions')">
+                            <i class="fas fa-exchange-alt fa-2x text-primary mb-2"></i>
+                            <h6>Transfer</h6>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <div class="quick-action" onclick="showSection('loans')">
+                            <i class="fas fa-file-alt fa-2x text-warning mb-2"></i>
+                            <h6>Apply Loan</h6>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <div class="quick-action" onclick="showSection('deposits')">
+                            <i class="fas fa-piggy-bank fa-2x text-info mb-2"></i>
+                            <h6>Open FD</h6>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                        <div class="quick-action" onclick="showSection('transactions')">
+                            <i class="fas fa-history fa-2x text-secondary mb-2"></i>
+                            <h6>Statement</h6>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Transactions -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-history me-2"></i>Recent Transactions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="recentTransactions">
+                                    <!-- Recent transactions will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>Account Status
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">KYC Status</label>
+                                    <div id="kycStatus" class="kyc-status kyc-pending">Pending</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Account Number</label>
+                                    <p class="mb-0 fw-bold" id="accountNumber">Loading...</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Member Since</label>
+                                    <p class="mb-0" id="memberSince">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other sections will be added here -->
+        <!--<div id="accounts" class="section" style="display: none;">
+            <div class="container-fluid p-4">
+                <h2>My Accounts</h2>
+                <p>Account management features will be implemented here.</p>
+                
+            </div>
+        </div>-->
+
+
+        <div id="transactions" class="section" style="display: none;">
+            <div class="container-fluid p-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="fw-bold">
+                            <i class="fas fa-exchange-alt me-2"></i>
+                            Transactions
+                        </h2>
+                        <p class="text-muted">Manage your money transfers and view transaction history</p>
+                    </div>
+                </div>
+
+                <!-- Transaction Actions -->
+                <div class="row mb-4">
+                    <div class="col-lg-4">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-exchange-alt me-2 text-primary"></i>Transfer Money
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="transferForm">
+                                    <div class="mb-3">
+                                        <label for="toAccountNumber" class="form-label">To Account Number</label>
+                                        <input type="text" class="form-control" id="toAccountNumber" 
+                                               placeholder="Enter account number" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="transferAmount" class="form-label">Amount (₹)</label>
+                                        <input type="number" class="form-control" id="transferAmount" 
+                                               placeholder="Enter amount" min="1" step="0.01" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="transferDescription" class="form-label">Description</label>
+                                        <input type="text" class="form-control" id="transferDescription" 
+                                               placeholder="Transfer description" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-exchange-alt me-2"></i>Transfer Money
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-minus-circle me-2 text-danger"></i>Withdraw Money
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="withdrawForm">
+                                    <div class="mb-3">
+                                        <label for="withdrawAmount" class="form-label">Amount (₹)</label>
+                                        <input type="number" class="form-control" id="withdrawAmount" 
+                                               placeholder="Enter amount to withdraw" min="1" step="0.01" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="withdrawDescription" class="form-label">Description</label>
+                                        <input type="text" class="form-control" id="withdrawDescription" 
+                                               placeholder="Cash withdrawal" value="Cash withdrawal">
+                                    </div>
+                                    <button type="submit" class="btn btn-danger w-100">
+                                        <i class="fas fa-minus-circle me-2"></i>Withdraw Money
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2 text-info"></i>Account Summary
+                                </h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <h3 class="text-success mb-2" id="accountBalance">₹0.00</h3>
+                                <p class="text-muted mb-3">Available Balance</p>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-primary" onclick="loadTransactions()">
+                                        <i class="fas fa-refresh me-2"></i>Refresh
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction History -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card dashboard-card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-history me-2"></i>Transaction History
+                                </h5>
+                                <button class="btn btn-outline-primary btn-sm" onclick="loadTransactions()">
+                                    <i class="fas fa-refresh me-1"></i>Refresh
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="transactionHistory">
+                                    <div class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="text-muted mt-2">Loading transactions...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loans" class="section" style="display: none;">
+            <div class="container-fluid p-4">
+                <h2>Loans</h2>
+                <p>Loan management features will be implemented here.</p>
+            </div>
+        </div>
+
+        <div id="deposits" class="section" style="display: none;">
+            <div class="container-fluid p-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="fw-bold">
+                            <i class="fas fa-piggy-bank me-2"></i>
+                            Deposits
+                        </h2>
+                        <p class="text-muted">Manage your deposits and investments</p>
+                    </div>
+                </div>
+
+                <!-- Deposit Money Section -->
+                <div class="row mb-4">
+                    <div class="col-lg-6">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-plus-circle me-2 text-success"></i>Deposit Money
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="depositForm">
+                                    <div class="mb-3">
+                                        <label for="depositAmount" class="form-label">Amount (₹)</label>
+                                        <input type="number" class="form-control" id="depositAmount" 
+                                               placeholder="Enter amount to deposit" min="1" step="0.01" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="depositDescription" class="form-label">Description</label>
+                                        <input type="text" class="form-control" id="depositDescription" 
+                                               placeholder="Cash deposit" value="Cash deposit">
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100">
+                                        <i class="fas fa-plus-circle me-2"></i>Deposit Money
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle me-2 text-info"></i>Account Balance
+                                </h5>
+                            </div>
+                            <div class="card-body text-center">
+                                <h2 class="text-success mb-3" id="currentBalance">₹0.00</h2>
+                                <p class="text-muted">Available Balance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Existing Deposits -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-history me-2"></i>Fixed Deposits
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="depositsList">
+                                    <p class="text-muted text-center">No fixed deposits found</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="profile" class="section" style="display: none;">
+            <div class="container-fluid p-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="fw-bold">
+                            <i class="fas fa-user me-2"></i>
+                            Profile Management
+                        </h2>
+                        <p class="text-muted">Manage your personal information and account settings</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Personal Information -->
+                    <div class="col-lg-6">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-user-edit me-2 text-primary"></i>Personal Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="profileForm">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="profileFirstName" class="form-label">First Name</label>
+                                                <input type="text" class="form-control" id="profileFirstName" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="profileLastName" class="form-label">Last Name</label>
+                                                <input type="text" class="form-control" id="profileLastName" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="profileEmail" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="profileEmail" readonly>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="profilePhone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="profilePhone" readonly>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="profileUsername" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="profileUsername" readonly>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-outline-primary" onclick="editProfile()">
+                                        <i class="fas fa-edit me-2"></i>Edit Profile
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Account Information -->
+                    <div class="col-lg-6">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-university me-2 text-success"></i>Account Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Account Number</label>
+                                    <p class="form-control-plaintext fw-bold" id="profileAccountNumber">Loading...</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Account Status</label>
+                                    <div id="profileAccountStatus" class="kyc-status kyc-pending">Loading...</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">KYC Status</label>
+                                    <div id="profileKycStatus" class="kyc-status kyc-pending">Loading...</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Current Balance</label>
+                                    <p class="form-control-plaintext fw-bold text-success" id="profileBalance">Loading...</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Member Since</label>
+                                    <p class="form-control-plaintext" id="profileMemberSince">Loading...</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Last Login</label>
+                                    <p class="form-control-plaintext" id="profileLastLogin">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KYC Information -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card dashboard-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-id-card me-2 text-warning"></i>KYC Information
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">PAN Number</label>
+                                            <p class="form-control-plaintext" id="profilePanNumber">Not provided</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Aadhar Number</label>
+                                            <p class="form-control-plaintext" id="profileAadharNumber">Not provided</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Date of Birth</label>
+                                    <p class="form-control-plaintext" id="profileDateOfBirth">Not provided</p>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Address</label>
+                                    <p class="form-control-plaintext" id="profileAddress">Not provided</p>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Note:</strong> KYC information is required for full account activation. 
+                                    Contact customer support if you need to update your KYC details.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentUser = null;
+        let customerData = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile();
+            loadDashboardData();
+        });
+
+        // Load user profile
+        async function loadUserProfile() {
+            try {
+                const response = await fetch('/api/profile');
+                if (response.ok) {
+                    currentUser = await response.json();
+                    document.getElementById('userName').textContent = currentUser.username;
+                } else {
+                    // Redirect to login if not authenticated
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                window.location.href = '/login';
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                // Load customer data
+                const customerResponse = await fetch('/api/customers');
+                if (customerResponse.ok) {
+                    const customers = await customerResponse.json();
+                    customerData = customers.find(c => c.user_id === currentUser.id);
+                    
+                    if (customerData) {
+                        document.getElementById('totalBalance').textContent = `₹${customerData.balance.toFixed(2)}`;
+                        document.getElementById('accountNumber').textContent = customerData.account_number;
+                        document.getElementById('memberSince').textContent = new Date(customerData.created_at).toLocaleDateString();
+                        
+                        // Update KYC status
+                        const kycStatus = document.getElementById('kycStatus');
+                        if (customerData.kyc_verified) {
+                            kycStatus.className = 'kyc-status kyc-verified';
+                            kycStatus.textContent = 'Verified';
+                        } else {
+                            kycStatus.className = 'kyc-status kyc-pending';
+                            kycStatus.textContent = 'Pending';
+                        }
+                    }
+                }
+
+                // Load recent transactions
+                if (customerData) {
+                    const transactionsResponse = await fetch(`/api/customers/${customerData.id}/transactions`);
+                    if (transactionsResponse.ok) {
+                        const transactions = await transactionsResponse.json();
+                        displayRecentTransactions(transactions.slice(0, 5));
+                        document.getElementById('monthlyTransactions').textContent = transactions.length;
+                    }
+                }
+
+                // Load loans and deposits data
+                // This would be implemented when those APIs are ready
+                
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Display recent transactions
+        function displayRecentTransactions(transactions) {
+            const container = document.getElementById('recentTransactions');
+            
+            if (transactions.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No recent transactions</p>';
+                return;
+            }
+
+            container.innerHTML = transactions.map(transaction => {
+                const typeClass = transaction.transaction_type;
+                const icon = transaction.transaction_type === 'deposit' ? 'fa-plus-circle text-success' :
+                           transaction.transaction_type === 'withdraw' ? 'fa-minus-circle text-danger' :
+                           'fa-exchange-alt text-primary';
+                
+                return `
+                    <div class="transaction-item ${typeClass}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="fas ${icon} me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">${transaction.description}</h6>
+                                    <small class="text-muted">${new Date(transaction.created_at).toLocaleDateString()}</small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <h6 class="mb-1">₹${transaction.amount.toFixed(2)}</h6>
+                                <small class="text-muted">Balance: ₹${transaction.balance_after.toFixed(2)}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Show section
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Show selected section
+            document.getElementById(sectionName).style.display = 'block';
+
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Add active class to current nav item
+            const currentNavItem = document.querySelector(`[href="#${sectionName}"]`);
+            if (currentNavItem) {
+                currentNavItem.classList.add('active');
+            }
+        }
+
+        // Toggle sidebar
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/';
+            }
+        }
+
+        // Show notifications (placeholder)
+        function showNotifications() {
+            alert('Notifications feature will be implemented here.');
+        }
+
+        // Deposit form submission
+        document.getElementById('depositForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+            const description = document.getElementById('depositDescription').value;
+            
+            if (!customerData) {
+                alert('Customer data not loaded. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/customers/${customerData.id}/deposit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: amount,
+                        description: description
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Deposit successful! New balance: ₹' + result.new_balance.toFixed(2));
+                    document.getElementById('depositForm').reset();
+                    document.getElementById('depositDescription').value = 'Cash deposit';
+                    loadDashboardData(); // Refresh dashboard data
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        });
+
+        // Withdraw form submission
+        document.getElementById('withdrawForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const description = document.getElementById('withdrawDescription').value;
+            
+            if (!customerData) {
+                alert('Customer data not loaded. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/customers/${customerData.id}/withdraw`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: amount,
+                        description: description
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Withdrawal successful! New balance: ₹' + result.new_balance.toFixed(2));
+                    document.getElementById('withdrawForm').reset();
+                    document.getElementById('withdrawDescription').value = 'Cash withdrawal';
+                    loadDashboardData(); // Refresh dashboard data
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        });
+
+        // Transfer form submission
+        document.getElementById('transferForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const toAccountNumber = document.getElementById('toAccountNumber').value;
+            const amount = parseFloat(document.getElementById('transferAmount').value);
+            const description = document.getElementById('transferDescription').value;
+            
+            if (!customerData) {
+                alert('Customer data not loaded. Please refresh the page.');
+                return;
+            }
+            
+            try {
+                // First, find the customer by account number
+                const customersResponse = await fetch('/api/customers');
+                const customers = await customersResponse.json();
+                const toCustomer = customers.find(c => c.account_number === toAccountNumber);
+                
+                if (!toCustomer) {
+                    alert('Account number not found. Please check and try again.');
+                    return;
+                }
+                
+                const response = await fetch(`/api/customers/${customerData.id}/transfer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: amount,
+                        to_customer_id: toCustomer.id,
+                        description: description
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(`Transfer successful! Your new balance: ₹${result.from_balance.toFixed(2)}`);
+                    document.getElementById('transferForm').reset();
+                    loadDashboardData(); // Refresh dashboard data
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        });
+
+        // Load transactions function
+        async function loadTransactions() {
+            if (!customerData) return;
+            
+            try {
+                const response = await fetch(`/api/customers/${customerData.id}/transactions`);
+                if (response.ok) {
+                    const transactions = await response.json();
+                    displayTransactionHistory(transactions);
+                }
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+            }
+        }
+
+        // Display transaction history
+        function displayTransactionHistory(transactions) {
+            const container = document.getElementById('transactionHistory');
+            
+            if (transactions.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No transactions found</p>';
+                return;
+            }
+
+            container.innerHTML = transactions.map(transaction => {
+                const typeClass = transaction.transaction_type;
+                const icon = transaction.transaction_type === 'deposit' ? 'fa-plus-circle text-success' :
+                           transaction.transaction_type === 'withdraw' ? 'fa-minus-circle text-danger' :
+                           'fa-exchange-alt text-primary';
+                
+                const amountClass = transaction.transaction_type === 'deposit' ? 'text-success' :
+                                  transaction.transaction_type === 'withdraw' ? 'text-danger' :
+                                  'text-primary';
+                
+                return `
+                    <div class="transaction-item ${typeClass}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="fas ${icon} me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">${transaction.description}</h6>
+                                    <small class="text-muted">${new Date(transaction.created_at).toLocaleDateString()} ${new Date(transaction.created_at).toLocaleTimeString()}</small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <h6 class="mb-1 ${amountClass}">
+                                    ${transaction.transaction_type === 'deposit' ? '+' : transaction.transaction_type === 'withdraw' ? '-' : ''}₹${transaction.amount.toFixed(2)}
+                                </h6>
+                                <small class="text-muted">Balance: ₹${transaction.balance_after.toFixed(2)}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Load profile data
+        async function loadProfileData() {
+            if (!customerData || !currentUser) return;
+            
+            // Personal information
+            document.getElementById('profileFirstName').value = customerData.first_name || '';
+            document.getElementById('profileLastName').value = customerData.last_name || '';
+            document.getElementById('profileEmail').value = currentUser.email || '';
+            document.getElementById('profilePhone').value = currentUser.phone || '';
+            document.getElementById('profileUsername').value = currentUser.username || '';
+            
+            // Account information
+            document.getElementById('profileAccountNumber').textContent = customerData.account_number || 'N/A';
+            document.getElementById('profileBalance').textContent = `₹${customerData.balance.toFixed(2)}`;
+            document.getElementById('profileMemberSince').textContent = new Date(customerData.created_at).toLocaleDateString();
+            document.getElementById('profileLastLogin').textContent = currentUser.last_login ? new Date(currentUser.last_login).toLocaleDateString() : 'Never';
+            
+            // Account status
+            const accountStatus = document.getElementById('profileAccountStatus');
+            accountStatus.textContent = customerData.account_status || 'Unknown';
+            accountStatus.className = 'kyc-status ' + (customerData.account_status === 'active' ? 'kyc-verified' : 'kyc-pending');
+            
+            // KYC status
+            const kycStatus = document.getElementById('profileKycStatus');
+            kycStatus.textContent = customerData.kyc_verified ? 'Verified' : 'Pending';
+            kycStatus.className = 'kyc-status ' + (customerData.kyc_verified ? 'kyc-verified' : 'kyc-pending');
+            
+            // KYC details
+            document.getElementById('profilePanNumber').textContent = customerData.pan_number || 'Not provided';
+            document.getElementById('profileAadharNumber').textContent = customerData.aadhar_number || 'Not provided';
+            document.getElementById('profileDateOfBirth').textContent = customerData.date_of_birth || 'Not provided';
+            document.getElementById('profileAddress').textContent = customerData.address || 'Not provided';
+        }
+
+        // Edit profile function (placeholder)
+        function editProfile() {
+            alert('Profile editing feature will be implemented in the next version. Contact customer support for profile changes.');
+        }
+
+        // Enhanced showSection function to load data when switching sections
+        const originalShowSection = showSection;
+        showSection = function(sectionName) {
+            originalShowSection(sectionName);
+            
+            // Load specific data when switching to sections
+            if (sectionName === 'transactions') {
+                loadTransactions();
+                if (customerData) {
+                    document.getElementById('accountBalance').textContent = `₹${customerData.balance.toFixed(2)}`;
+                }
+            } else if (sectionName === 'deposits') {
+                if (customerData) {
+                    document.getElementById('currentBalance').textContent = `₹${customerData.balance.toFixed(2)}`;
+                }
+            } else if (sectionName === 'profile') {
+                loadProfileData();
+            }
+        };
+    </script>
+</body>
+</html>
+

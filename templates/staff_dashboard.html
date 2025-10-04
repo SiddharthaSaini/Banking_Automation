@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard - NovaFin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: none;
+        }
+        .approval-card {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        .loan-card {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        .customer-card {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-user-tie me-2"></i>Staff Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="#" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="mb-4">
+                    <i class="fas fa-tachometer-alt me-2"></i>Staff Dashboard
+                </h2>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-lg-4 col-md-6 mb-3">
+                <div class="card dashboard-card approval-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Pending Approvals</h6>
+                                <h3 class="mb-0" id="pendingApprovals">0</h3>
+                            </div>
+                            <div>
+                                <i class="fas fa-clock fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-3">
+                <div class="card dashboard-card loan-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">Pending Loans</h6>
+                                <h3 class="mb-0" id="pendingLoans">0</h3>
+                            </div>
+                            <div>
+                                <i class="fas fa-hand-holding-usd fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-3">
+                <div class="card dashboard-card customer-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">New Customers</h6>
+                                <h3 class="mb-0" id="newCustomers">0</h3>
+                            </div>
+                            <div>
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Pending Loan Applications
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="pendingLoansList">
+                            <p class="text-muted text-center">No pending loans</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card dashboard-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-plus me-2"></i>New Customer Accounts
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="newCustomersList">
+                            <p class="text-muted text-center">No new customers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function loadStaffData() {
+            try {
+                // Load pending loans
+                const loansResponse = await fetch('/api/loans');
+                if (loansResponse.ok) {
+                    const loans = await loansResponse.json();
+                    const pendingLoans = loans.filter(loan => loan.status === 'pending');
+                    document.getElementById('pendingLoans').textContent = pendingLoans.length;
+                    displayPendingLoans(pendingLoans);
+                }
+
+                // Load new customers
+                const customersResponse = await fetch('/api/customers');
+                if (customersResponse.ok) {
+                    const customers = await customersResponse.json();
+                    const newCustomers = customers.filter(customer => customer.account_status === 'pending');
+                    document.getElementById('newCustomers').textContent = newCustomers.length;
+                    displayNewCustomers(newCustomers);
+                }
+            } catch (error) {
+                console.error('Error loading staff data:', error);
+            }
+        }
+
+        function displayPendingLoans(loans) {
+            const container = document.getElementById('pendingLoansList');
+            
+            if (loans.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No pending loans</p>';
+                return;
+            }
+
+            container.innerHTML = loans.map(loan => `
+                <div class="border rounded p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${loan.loan_type.toUpperCase()} Loan</h6>
+                            <small class="text-muted">Amount: ₹${loan.amount.toFixed(2)} | EMI: ₹${loan.emi_amount.toFixed(2)}</small>
+                        </div>
+                        <button class="btn btn-success btn-sm" onclick="approveLoan(${loan.id})">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function displayNewCustomers(customers) {
+            const container = document.getElementById('newCustomersList');
+            
+            if (customers.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No new customers</p>';
+                return;
+            }
+
+            container.innerHTML = customers.map(customer => `
+                <div class="border rounded p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${customer.first_name} ${customer.last_name}</h6>
+                            <small class="text-muted">${customer.account_number} | ${customer.email}</small>
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="approveCustomer(${customer.id})">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function approveLoan(loanId) {
+            try {
+                const response = await fetch(`/api/loans/${loanId}/approve`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    alert('Loan approved successfully!');
+                    loadStaffData();
+                } else {
+                    alert('Failed to approve loan');
+                }
+            } catch (error) {
+                console.error('Error approving loan:', error);
+                alert('Error approving loan');
+            }
+        }
+
+        async function approveCustomer(customerId) {
+            try {
+                const response = await fetch(`/api/customers/${customerId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        account_status: 'active'
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Customer approved successfully!');
+                    loadStaffData();
+                } else {
+                    alert('Failed to approve customer');
+                }
+            } catch (error) {
+                console.error('Error approving customer:', error);
+                alert('Error approving customer');
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                window.location.href = '/';
+            }
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', loadStaffData);
+    </script>
+</body>
+</html>
+

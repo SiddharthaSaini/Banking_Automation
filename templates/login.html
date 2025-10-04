@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - NovaFin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .login-form {
+            padding: 3rem;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-floating {
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+
+
+        .role-selection {
+            display: none;
+        }
+
+        .role-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .role-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-2px);
+        }
+
+        .role-card.selected {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .loading {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="login-container">
+                    <div class="login-form">
+                        <!-- Role Selection -->
+                        <div id="roleSelection" class="role-selection">
+                            <div class="login-header">
+                                <h3 class="fw-bold text-primary">
+                                    <i class="fas fa-university me-2"></i>NovaFin
+                                </h3>
+                                <p class="text-muted">Select your role to continue</p>
+                            </div>
+                            
+                            <div class="role-card" data-role="customer">
+                                <div class="mb-3">
+                                    <i class="fas fa-user fa-2x text-primary"></i>
+                                </div>
+                                <h5 class="fw-bold">Customer</h5>
+                                <p class="text-muted mb-0">Access your personal banking account</p>
+                            </div>
+                            
+                            <div class="role-card" data-role="staff">
+                                <div class="mb-3">
+                                    <i class="fas fa-user-tie fa-2x text-success"></i>
+                                </div>
+                                <h5 class="fw-bold">Bank Staff</h5>
+                                <p class="text-muted mb-0">Staff dashboard for account management</p>
+                            </div>
+                            
+                            <div class="role-card" data-role="admin">
+                                <div class="mb-3">
+                                    <i class="fas fa-user-shield fa-2x text-danger"></i>
+                                </div>
+                                <h5 class="fw-bold">Administrator</h5>
+                                <p class="text-muted mb-0">System administration and analytics</p>
+                            </div>
+                            
+                            <button id="continueBtn" class="btn btn-primary btn-login w-100" disabled>
+                                Continue
+                            </button>
+                        </div>
+
+                        <!-- Login Form -->
+                        <div id="loginForm" class="login-form-container">
+                            <div class="login-header">
+                                <h3 class="fw-bold text-primary">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                                </h3>
+                                <p class="text-muted">Welcome back! Please sign in to your account</p>
+                            </div>
+
+                            <form id="loginFormElement">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" id="email" placeholder="Email" required>
+                                    <label for="email">
+                                        <i class="fas fa-envelope me-2"></i>Email Address
+                                    </label>
+                                </div>
+
+                                <div class="form-floating">
+                                    <input type="password" class="form-control" id="password" placeholder="Password" required>
+                                    <label for="password">
+                                        <i class="fas fa-lock me-2"></i>Password
+                                    </label>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                                        <label class="form-check-label" for="rememberMe">
+                                            Remember me
+                                        </label>
+                                    </div>
+                                    <a href="#" class="text-decoration-none">Forgot Password?</a>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-login w-100 mb-3">
+                                    <span class="login-text">
+                                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                                    </span>
+                                    <span class="loading">
+                                        <i class="fas fa-spinner fa-spin me-2"></i>Signing In...
+                                    </span>
+                                </button>
+                            </form>
+
+                            <div class="text-center">
+                                <p class="mb-0">Don't have an account? 
+                                    <a href="/register" class="text-decoration-none fw-bold">Register here</a>
+                                </p>
+                                <a href="/" class="text-decoration-none text-muted">
+                                    <i class="fas fa-arrow-left me-1"></i>Back to Home
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert">
+            <div class="toast-header bg-success text-white">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong class="me-auto">Success</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="successMessage"></div>
+        </div>
+        
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header bg-danger text-white">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorMessage"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let selectedRole = null;
+
+        // Role selection
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedRole = this.dataset.role;
+                document.getElementById('continueBtn').disabled = false;
+            });
+        });
+
+        document.getElementById('continueBtn').addEventListener('click', function() {
+            if (selectedRole) {
+                document.getElementById('roleSelection').style.display = 'none';
+                document.getElementById('loginForm').style.display = 'block';
+            }
+        });
+
+        // Login form submission
+        document.getElementById('loginFormElement').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            // Show loading
+            document.querySelector('.login-text').style.display = 'none';
+            document.querySelector('.loading').style.display = 'inline';
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        role: selectedRole
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast('success', 'Login successful! Redirecting...');
+                    setTimeout(() => {
+                        // Redirect based on role
+                        const role = result.user.role;
+                        if (role === 'customer') {
+                            window.location.href = '/dashboard/customer';
+                        } else if (role === 'staff') {
+                            window.location.href = '/dashboard/staff';
+                        } else if (role === 'admin') {
+                            window.location.href = '/dashboard/admin';
+                        }
+                    }, 1500);
+                } else {
+                    showToast('error', result.error || 'Login failed');
+                }
+            } catch (error) {
+                showToast('error', 'Network error. Please try again.');
+            } finally {
+                document.querySelector('.login-text').style.display = 'inline';
+                document.querySelector('.loading').style.display = 'none';
+            }
+        });
+
+
+        // Show toast notification
+        function showToast(type, message) {
+            const toastElement = document.getElementById(`${type}Toast`);
+            const messageElement = document.getElementById(`${type}Message`);
+            
+            messageElement.textContent = message;
+            
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+
+        // Auto-focus on email input when login form is shown
+        document.getElementById('loginForm').addEventListener('DOMNodeInserted', function() {
+            document.getElementById('email').focus();
+        });
+    </script>
+</body>
+</html>
+

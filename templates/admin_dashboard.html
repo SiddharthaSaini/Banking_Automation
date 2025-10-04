@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SecureBank</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            min-height: 100vh;
+            color: white;
+            position: fixed;
+            width: 250px;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-custom {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .admin-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: none;
+            transition: transform 0.3s ease;
+        }
+
+        .admin-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #dc2626;
+            display: block;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            margin: 0.25rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 10px;
+        }
+
+        .account-card {
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .account-card:hover {
+            border-color: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .account-card.pending {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .account-card.approved {
+            border-left: 4px solid #10b981;
+        }
+
+        .account-card.rejected {
+            border-left: 4px solid #ef4444;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="p-3">
+            <div class="d-flex align-items-center mb-4">
+                <i class="fas fa-shield-alt fa-2x me-3"></i>
+                <span>NovaFin Admin</span>
+            </div>
+            
+            <div class="nav flex-column">
+                <a class="nav-link" href="/" onclick="window.location.href='/'">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a class="nav-link active" href="#dashboard" onclick="showSection('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a class="nav-link" href="#pending-accounts" onclick="showSection('pending-accounts')">
+                    <i class="fas fa-user-clock"></i>
+                    <span>Pending Accounts</span>
+                </a>
+                <a class="nav-link" href="#all-accounts" onclick="showSection('all-accounts')">
+                    <i class="fas fa-users"></i>
+                    <span>All Accounts</span>
+                </a>
+                <a class="nav-link" href="#pending-kyc" onclick="showSection('pending-kyc')">
+                    <i class="fas fa-id-card"></i>
+                    <span>Pending KYC</span>
+                </a>
+                <a class="nav-link" href="#analytics" onclick="showSection('analytics')">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </a>
+                <a class="nav-link" href="#" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-custom">
+            <div class="container-fluid">
+                <div class="navbar-nav ms-auto">
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-shield me-2"></i>
+                            <span id="adminName">Loading...</span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="section">
+            <div class="container-fluid p-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="fw-bold">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Admin Dashboard
+                        </h2>
+                        <p class="text-muted">System overview and management</p>
+                    </div>
+                </div>
+
+                <!-- Statistics Cards -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card admin-card">
+                            <div class="card-body stat-card">
+                                <span class="stat-number" id="totalCustomers">0</span>
+                                <div class="stat-label">Total Customers</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card admin-card">
+                            <div class="card-body stat-card">
+                                <span class="stat-number" id="pendingAccounts">0</span>
+                                <div class="stat-label">Pending Accounts</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card admin-card">
+                            <div class="card-body stat-card">
+                                <span class="stat-number" id="totalBalance">₹0</span>
+                                <div class="stat-label">Total Balance</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <div class="card admin-card">
+                            <div class="card-body stat-card">
+                                <span class="stat-number" id="openAlerts">0</span>
+                                <div class="stat-label">Open Alerts</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card admin-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-bolt me-2"></i>Quick Actions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-warning" onclick="showSection('pending-accounts')">
+                                        <i class="fas fa-user-check me-2"></i>Review Pending Accounts
+                                    </button>
+                                    <button class="btn btn-info" onclick="showSection('all-accounts')">
+                                        <i class="fas fa-users me-2"></i>View All Accounts
+                                    </button>
+                                    <button class="btn btn-success" onclick="showSection('analytics')">
+                                        <i class="fas fa-chart-line me-2"></i>View Analytics
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card admin-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>System Alerts
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="systemAlerts">
+                                    <p class="text-muted">No active alerts</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Accounts Section -->
+        <div id="pending-accounts" class="section" style="display: none;">
+            <div class="container-fluid p-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="fw-bold">
+                            <i class="fas fa-user-clock me-2"></i>
+                            Pending Account Approvals
+                        </h2>
+                        <p class="text-muted">Review and approve new account requests</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card admin-card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Pending Applications</h5>
+                                <button class="btn btn-outline-primary btn-sm" onclick="loadPendingAccounts()">
+                                    <i class="fas fa-refresh me-1"></i>Refresh
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="pendingAccountsList">
+                                    <div class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="text-muted mt-2">Loading pending accounts...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending KYC Section -->
+        <div id="pending-kyc" class="section" style="display: none;">
+            <div class="container-fluid p-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="fw-bold">
+                            <i class="fas fa-id-card me-2"></i>
+                            Pending KYC Approvals
+                        </h2>
+                        <p class="text-muted">Review and approve customer KYC</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card admin-card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">KYC Pending Customers</h5>
+                                <button class="btn btn-outline-primary btn-sm" onclick="loadPendingKyc()">
+                                    <i class="fas fa-refresh me-1"></i>Refresh
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="pendingKycList">
+                                    <div class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="text-muted mt-2">Loading pending KYC...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- All Accounts Section -->
+        <div id="all-accounts" class="section" style="display: none;">
+            <div class="container-fluid p-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="fw-bold">
+                            <i class="fas fa-users me-2"></i>
+                            All Customer Accounts
+                        </h2>
+                        <p class="text-muted">Manage all customer accounts and view detailed information</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card admin-card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">Customer Accounts</h5>
+                                <button class="btn btn-outline-primary btn-sm" onclick="loadAllAccounts()">
+                                    <i class="fas fa-refresh me-1"></i>Refresh
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="allAccountsList">
+                                    <div class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="text-muted mt-2">Loading all accounts...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analytics" class="section" style="display: none;">
+            <div class="container-fluid p-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="fw-bold">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            System Analytics
+                        </h2>
+                        <p class="text-muted">Comprehensive system analytics and insights</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card admin-card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Analytics Overview</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="analyticsContent">
+                                    <div class="text-center">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="text-muted mt-2">Loading analytics...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentAdmin = null;
+
+        // Initialize admin dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAdminProfile();
+            loadDashboardData();
+        });
+
+        // Load admin profile
+        async function loadAdminProfile() {
+            try {
+                const response = await fetch('/api/profile');
+                if (response.ok) {
+                    currentAdmin = await response.json();
+                    document.getElementById('adminName').textContent = currentAdmin.username;
+                    
+                    // Check if user is admin
+                    if (currentAdmin.role !== 'admin') {
+                        alert('Access denied. Admin privileges required.');
+                        window.location.href = '/';
+                    }
+                } else {
+                    window.location.href = '/admin';
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                window.location.href = '/admin';
+            }
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/analytics/dashboard');
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    document.getElementById('totalCustomers').textContent = data.total_customers;
+                    document.getElementById('totalBalance').textContent = '₹' + data.total_balance.toFixed(2);
+                    document.getElementById('openAlerts').textContent = data.open_alerts;
+                    
+                    // Load pending accounts count
+                    const pendingResponse = await fetch('/api/admin/pending-accounts');
+                    if (pendingResponse.ok) {
+                        const pendingAccounts = await pendingResponse.json();
+                        document.getElementById('pendingAccounts').textContent = pendingAccounts.length;
+                    }
+
+                    // Preload pending KYC for quick access
+                    loadPendingKyc();
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Load pending accounts
+        async function loadPendingAccounts() {
+            try {
+                const response = await fetch('/api/admin/pending-accounts');
+                if (response.ok) {
+                    const accounts = await response.json();
+                    displayPendingAccounts(accounts);
+                }
+            } catch (error) {
+                console.error('Error loading pending accounts:', error);
+            }
+        }
+
+        // Display pending accounts
+        function displayPendingAccounts(accounts) {
+            const container = document.getElementById('pendingAccountsList');
+            
+            if (accounts.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No pending accounts</p>';
+                return;
+            }
+
+            container.innerHTML = accounts.map(account => `
+                <div class="account-card pending">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="fw-bold mb-2">${account.first_name} ${account.last_name}</h6>
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-envelope me-2"></i>${account.email}
+                            </p>
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-phone me-2"></i>${account.phone}
+                            </p>
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-id-card me-2"></i>Account: ${account.account_number}
+                            </p>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-calendar me-2"></i>Applied: ${new Date(account.created_at).toLocaleDateString()}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="mb-3">
+                                <span class="status-badge status-pending">Pending</span>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success btn-sm" onclick="approveAccount(${account.id})">
+                                    <i class="fas fa-check me-1"></i>Approve
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="rejectAccount(${account.id})">
+                                    <i class="fas fa-times me-1"></i>Reject
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load pending KYC
+        async function loadPendingKyc() {
+            try {
+                const response = await fetch('/api/admin/pending-kyc');
+                if (response.ok) {
+                    const accounts = await response.json();
+                    displayPendingKyc(accounts);
+                }
+            } catch (error) {
+                console.error('Error loading pending KYC:', error);
+            }
+        }
+
+        // Display pending KYC
+        function displayPendingKyc(accounts) {
+            const container = document.getElementById('pendingKycList');
+            if (!container) return;
+
+            if (accounts.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No pending KYC</p>';
+                return;
+            }
+
+            container.innerHTML = accounts.map(account => `
+                <div class="account-card pending">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="fw-bold mb-2">${account.first_name} ${account.last_name}</h6>
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-envelope me-2"></i>${account.email}
+                            </p>
+                            <p class="text-muted mb-1">
+                                <i class="fas fa-phone me-2"></i>${account.phone}
+                            </p>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-id-card me-2"></i>Account: ${account.account_number}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success btn-sm" onclick="approveKyc(${account.id})">
+                                    <i class="fas fa-check me-1"></i>Approve KYC
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="rejectKyc(${account.id})">
+                                    <i class="fas fa-times me-1"></i>Reject KYC
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load all accounts
+        async function loadAllAccounts() {
+            try {
+                const response = await fetch('/api/admin/all-accounts');
+                if (response.ok) {
+                    const accounts = await response.json();
+                    displayAllAccounts(accounts);
+                }
+            } catch (error) {
+                console.error('Error loading all accounts:', error);
+            }
+        }
+
+        // Display all accounts
+        function displayAllAccounts(accounts) {
+            const container = document.getElementById('allAccountsList');
+            
+            if (accounts.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">No accounts found</p>';
+                return;
+            }
+
+            container.innerHTML = accounts.map(account => {
+                const statusClass = account.account_status === 'active' ? 'approved' : 
+                                  account.account_status === 'rejected' ? 'rejected' : 'pending';
+                const statusBadgeClass = account.account_status === 'active' ? 'status-active' : 
+                                       account.account_status === 'rejected' ? 'status-rejected' : 'status-pending';
+                
+                return `
+                    <div class="account-card ${statusClass}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold mb-2">${account.first_name} ${account.last_name}</h6>
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-user me-2"></i>Username: ${account.username}
+                                </p>
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-envelope me-2"></i>${account.email}
+                                </p>
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-phone me-2"></i>${account.phone}
+                                </p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-id-card me-2"></i>Account: ${account.account_number}
+                                </p>
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-rupee-sign me-2"></i>Balance: ₹${account.balance.toFixed(2)}
+                                </p>
+                                <p class="text-muted mb-1">
+                                    <i class="fas fa-exchange-alt me-2"></i>Transactions: ${account.transaction_count}
+                                </p>
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-calendar me-2"></i>Created: ${new Date(account.created_at).toLocaleDateString()}
+                                </p>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <div class="mb-2">
+                                    <span class="status-badge ${statusBadgeClass}">${account.account_status}</span>
+                                </div>
+                                <div class="mb-2">
+                                    <small class="text-muted">
+                                        KYC: ${account.kyc_verified ? 'Verified' : 'Pending'}
+                                    </small>
+                                </div>
+                                <div>
+                                    <small class="text-muted">
+                                        Last Login: ${account.last_login ? new Date(account.last_login).toLocaleDateString() : 'Never'}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Approve account
+        async function approveAccount(customerId) {
+            if (!confirm('Are you sure you want to approve this account?')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/approve-account/${customerId}`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    alert('Account approved successfully!');
+                    loadPendingAccounts();
+                    loadDashboardData();
+                } else {
+                    alert('Error approving account');
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        }
+
+        // Reject account
+        async function rejectAccount(customerId) {
+            if (!confirm('Are you sure you want to reject this account?')) return;
+            
+            try {
+                const response = await fetch(`/api/admin/reject-account/${customerId}`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    alert('Account rejected successfully!');
+                    loadPendingAccounts();
+                    loadDashboardData();
+                } else {
+                    alert('Error rejecting account');
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        }
+
+        // Load analytics
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/api/analytics/dashboard');
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    document.getElementById('analyticsContent').innerHTML = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="fw-bold">Customer Statistics</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-users me-2"></i>Total Customers: ${data.total_customers}</li>
+                                    <li><i class="fas fa-rupee-sign me-2"></i>Total Balance: ₹${data.total_balance.toFixed(2)}</li>
+                                    <li><i class="fas fa-user-clock me-2"></i>Pending Accounts: ${data.total_customers - data.total_balance}</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold">Financial Overview</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-hand-holding-usd me-2"></i>Active Loans: ${data.total_loans}</li>
+                                    <li><i class="fas fa-piggy-bank me-2"></i>Fixed Deposits: ${data.total_deposits}</li>
+                                    <li><i class="fas fa-exclamation-triangle me-2"></i>Open Alerts: ${data.open_alerts}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        // Show section
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Show selected section
+            document.getElementById(sectionName).style.display = 'block';
+
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Add active class to current nav item
+            const currentNavItem = document.querySelector(`[href="#${sectionName}"]`);
+            if (currentNavItem) {
+                currentNavItem.classList.add('active');
+            }
+
+            // Load section-specific data
+            if (sectionName === 'pending-accounts') {
+                loadPendingAccounts();
+            } else if (sectionName === 'pending-kyc') {
+                loadPendingKyc();
+            } else if (sectionName === 'all-accounts') {
+                loadAllAccounts();
+            } else if (sectionName === 'analytics') {
+                loadAnalytics();
+            }
+        }
+
+        // Approve KYC
+        async function approveKyc(customerId) {
+            if (!confirm('Approve KYC for this customer?')) return;
+            try {
+                const response = await fetch(`/api/admin/approve-kyc/${customerId}`, { method: 'POST' });
+                if (response.ok) {
+                    alert('KYC approved successfully!');
+                    loadPendingKyc();
+                    loadDashboardData();
+                } else {
+                    alert('Error approving KYC');
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        }
+
+        // Reject KYC
+        async function rejectKyc(customerId) {
+            if (!confirm('Reject KYC for this customer?')) return;
+            try {
+                const response = await fetch(`/api/admin/reject-kyc/${customerId}`, { method: 'POST' });
+                if (response.ok) {
+                    alert('KYC rejected successfully!');
+                    loadPendingKyc();
+                    loadDashboardData();
+                } else {
+                    alert('Error rejecting KYC');
+                }
+            } catch (error) {
+                alert('Network error. Please try again.');
+            }
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/';
+            }
+        }
+    </script>
+</body>
+</html>

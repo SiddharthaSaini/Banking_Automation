@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - NovaFin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .register-form {
+            padding: 3rem;
+        }
+
+        .register-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-floating {
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-register {
+            background: linear-gradient(135deg, #3b82f6, #06b6d4);
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .step {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .step.completed {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-line {
+            width: 60px;
+            height: 2px;
+            background: #e5e7eb;
+            margin: auto 0;
+            transition: all 0.3s ease;
+        }
+
+        .step-line.completed {
+            background: #10b981;
+        }
+
+        .form-step {
+            display: none;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        .password-strength {
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .strength-weak { background: #ef4444; width: 25%; }
+        .strength-fair { background: #f59e0b; width: 50%; }
+        .strength-good { background: #3b82f6; width: 75%; }
+        .strength-strong { background: #10b981; width: 100%; }
+
+        .kyc-section {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .loading {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="register-container">
+                    <div class="register-form">
+                        <div class="register-header">
+                            <h3 class="fw-bold text-primary">
+                                <i class="fas fa-university me-2"></i>NovaFin
+                            </h3>
+                            <p class="text-muted">Create your account in just a few steps</p>
+                        </div>
+
+                        <!-- Step Indicator -->
+                        <div class="step-indicator">
+                            <div class="step active" id="step1">1</div>
+                            <div class="step-line" id="line1"></div>
+                            <div class="step" id="step2">2</div>
+                            <div class="step-line" id="line2"></div>
+                            <div class="step" id="step3">3</div>
+                        </div>
+
+                        <form id="registerForm">
+                            <!-- Step 1: Basic Information -->
+                            <div class="form-step active" id="formStep1">
+                                <h5 class="fw-bold mb-3">Basic Information</h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="firstName" placeholder="First Name" required>
+                                            <label for="firstName">
+                                                <i class="fas fa-user me-2"></i>First Name
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="lastName" placeholder="Last Name" required>
+                                            <label for="lastName">Last Name</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" id="email" placeholder="Email" required>
+                                    <label for="email">
+                                        <i class="fas fa-envelope me-2"></i>Email Address
+                                    </label>
+                                </div>
+
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control" id="phone" placeholder="Phone" required>
+                                    <label for="phone">
+                                        <i class="fas fa-phone me-2"></i>Phone Number
+                                    </label>
+                                </div>
+
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="username" placeholder="Username" required>
+                                    <label for="username">
+                                        <i class="fas fa-at me-2"></i>Username
+                                    </label>
+                                </div>
+
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-primary" onclick="nextStep()">
+                                        Next <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Security -->
+                            <div class="form-step" id="formStep2">
+                                <h5 class="fw-bold mb-3">Security Information</h5>
+
+                                <div class="form-floating">
+                                    <input type="password" class="form-control" id="password" placeholder="Password" required>
+                                    <label for="password">
+                                        <i class="fas fa-lock me-2"></i>Password
+                                    </label>
+                                    <div class="password-strength" id="passwordStrength"></div>
+                                    <small class="text-muted">Password must be at least 8 characters with uppercase, lowercase, number, and special character</small>
+                                </div>
+
+                                <div class="form-floating">
+                                    <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" required>
+                                    <label for="confirmPassword">
+                                        <i class="fas fa-lock me-2"></i>Confirm Password
+                                    </label>
+                                </div>
+
+                                <div class="form-floating">
+                                    <select class="form-select" id="role" required>
+                                        <option value="">Select Account Type</option>
+                                        <option value="customer">Personal Banking</option>
+                                        <option value="staff">Bank Staff</option>
+                                       <!--<option value="admin">Administrator</option>-->
+                                    </select>
+                                    <label for="role">
+                                        <i class="fas fa-user-tag me-2"></i>Account Type
+                                    </label>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="prevStep()">
+                                        <i class="fas fa-arrow-left me-2"></i>Previous
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep()">
+                                        Next <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: KYC (for customers) -->
+                            <div class="form-step" id="formStep3">
+                                <h5 class="fw-bold mb-3">Additional Information</h5>
+
+                                <div class="kyc-section" id="kycSection" style="display: none;">
+                                    <h6 class="fw-bold mb-3 text-primary">KYC Information</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="panNumber" placeholder="PAN Number">
+                                                <label for="panNumber">PAN Number</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-floating">
+                                                <input type="text" class="form-control" id="aadharNumber" placeholder="Aadhar Number">
+                                                <label for="aadharNumber">Aadhar Number</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-floating">
+                                        <input type="date" class="form-control" id="dateOfBirth">
+                                        <label for="dateOfBirth">Date of Birth</label>
+                                    </div>
+
+                                    <div class="form-floating">
+                                        <textarea class="form-control" id="address" placeholder="Address" style="height: 100px"></textarea>
+                                        <label for="address">Address</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-check mb-4">
+                                    <input class="form-check-input" type="checkbox" id="terms" required>
+                                    <label class="form-check-label" for="terms">
+                                        I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> 
+                                        and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                                    </label>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline-secondary" onclick="prevStep()">
+                                        <i class="fas fa-arrow-left me-2"></i>Previous
+                                    </button>
+                                    <button type="submit" class="btn btn-primary btn-register">
+                                        <span class="register-text">
+                                            <i class="fas fa-user-plus me-2"></i>Create Account
+                                        </span>
+                                        <span class="loading">
+                                            <i class="fas fa-spinner fa-spin me-2"></i>Creating Account...
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-4">
+                            <p class="mb-0">Already have an account? 
+                                <a href="/login" class="text-decoration-none fw-bold">Login here</a>
+                            </p>
+                            <a href="/" class="text-decoration-none text-muted">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert">
+            <div class="toast-header bg-success text-white">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong class="me-auto">Success</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="successMessage"></div>
+        </div>
+        
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header bg-danger text-white">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorMessage"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentStep = 1;
+
+        // Password strength checker
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('passwordStrength');
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            strengthBar.className = 'password-strength';
+            if (strength <= 2) {
+                strengthBar.classList.add('strength-weak');
+            } else if (strength === 3) {
+                strengthBar.classList.add('strength-fair');
+            } else if (strength === 4) {
+                strengthBar.classList.add('strength-good');
+            } else {
+                strengthBar.classList.add('strength-strong');
+            }
+        });
+
+        // Show KYC section for customers
+        document.getElementById('role').addEventListener('change', function() {
+            const kycSection = document.getElementById('kycSection');
+            if (this.value === 'customer') {
+                kycSection.style.display = 'block';
+                // Make KYC fields required
+                document.getElementById('panNumber').required = true;
+                document.getElementById('aadharNumber').required = true;
+                document.getElementById('dateOfBirth').required = true;
+                document.getElementById('address').required = true;
+            } else {
+                kycSection.style.display = 'none';
+                // Remove required from KYC fields
+                document.getElementById('panNumber').required = false;
+                document.getElementById('aadharNumber').required = false;
+                document.getElementById('dateOfBirth').required = false;
+                document.getElementById('address').required = false;
+            }
+        });
+
+        function nextStep() {
+            if (validateCurrentStep()) {
+                if (currentStep < 3) {
+                    document.getElementById(`formStep${currentStep}`).classList.remove('active');
+                    document.getElementById(`step${currentStep}`).classList.remove('active');
+                    document.getElementById(`step${currentStep}`).classList.add('completed');
+                    
+                    if (currentStep < 3) {
+                        document.getElementById(`line${currentStep}`).classList.add('completed');
+                    }
+                    
+                    currentStep++;
+                    document.getElementById(`formStep${currentStep}`).classList.add('active');
+                    document.getElementById(`step${currentStep}`).classList.add('active');
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                document.getElementById(`formStep${currentStep}`).classList.remove('active');
+                document.getElementById(`step${currentStep}`).classList.remove('active');
+                
+                currentStep--;
+                document.getElementById(`formStep${currentStep}`).classList.add('active');
+                document.getElementById(`step${currentStep}`).classList.add('active');
+                document.getElementById(`step${currentStep}`).classList.remove('completed');
+                document.getElementById(`line${currentStep}`).classList.remove('completed');
+            }
+        }
+
+        function validateCurrentStep() {
+            const currentStepElement = document.getElementById(`formStep${currentStep}`);
+            const requiredFields = currentStepElement.querySelectorAll('[required]');
+            
+            for (let field of requiredFields) {
+                if (!field.value.trim()) {
+                    field.focus();
+                    showToast('error', 'Please fill all required fields');
+                    return false;
+                }
+            }
+            
+            // Additional validations
+            if (currentStep === 2) {
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (password !== confirmPassword) {
+                    document.getElementById('confirmPassword').focus();
+                    showToast('error', 'Passwords do not match');
+                    return false;
+                }
+                
+                if (password.length < 8) {
+                    document.getElementById('password').focus();
+                    showToast('error', 'Password must be at least 8 characters long');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // Form submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!validateCurrentStep()) return;
+            
+            // Show loading
+            document.querySelector('.register-text').style.display = 'none';
+            document.querySelector('.loading').style.display = 'inline';
+            
+            try {
+                const formData = {
+                    username: document.getElementById('username').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    phone: document.getElementById('phone').value,
+                    role: document.getElementById('role').value
+                };
+                
+                // Add KYC data if customer
+                if (formData.role === 'customer') {
+                    formData.first_name = document.getElementById('firstName').value;
+                    formData.last_name = document.getElementById('lastName').value;
+                    formData.pan_number = document.getElementById('panNumber').value;
+                    formData.aadhar_number = document.getElementById('aadharNumber').value;
+                    formData.date_of_birth = document.getElementById('dateOfBirth').value;
+                    formData.address = document.getElementById('address').value;
+                }
+                
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showToast('success', 'Account created successfully! Redirecting to login...');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                } else {
+                    showToast('error', result.error || 'Registration failed');
+                }
+            } catch (error) {
+                showToast('error', 'Network error. Please try again.');
+            } finally {
+                document.querySelector('.register-text').style.display = 'inline';
+                document.querySelector('.loading').style.display = 'none';
+            }
+        });
+
+        // Show toast notification
+        function showToast(type, message) {
+            const toastElement = document.getElementById(`${type}Toast`);
+            const messageElement = document.getElementById(`${type}Message`);
+            
+            messageElement.textContent = message;
+            
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+        }
+
+        // Phone number formatting
+        document.getElementById('phone').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '');
+            if (this.value.length > 10) {
+                this.value = this.value.slice(0, 10);
+            }
+        });
+
+        // PAN number formatting
+        document.getElementById('panNumber').addEventListener('input', function(e) {
+            this.value = this.value.toUpperCase();
+            this.value = this.value.replace(/[^A-Z0-9]/g, '');
+        });
+
+        // Aadhar number formatting
+        document.getElementById('aadharNumber').addEventListener('input', function(e) {
+            this.value = this.value.replace(/\D/g, '');
+            if (this.value.length > 12) {
+                this.value = this.value.slice(0, 12);
+            }
+        });
+    </script>
+</body>
+</html>
+
